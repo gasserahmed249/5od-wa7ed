@@ -7,48 +7,66 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        html { scroll-behavior: smooth; }
         :root { --main-font: 'Cairo', sans-serif; }
-        
-        /* Language Toggling Logic */
         .en-text { display: none; font-family: 'Inter', sans-serif; }
         .ar-text { display: inline; font-family: 'Cairo', sans-serif; }
-        
         .lang-en .en-text { display: inline; }
         .lang-en .ar-text { display: none; }
         
         .player-img { width: 100%; height: 320px; object-fit: contain; background-color: #1e293b; }
-        
         .player-card, .news-card { transition: all 0.4s ease; border: 1px solid rgba(251, 191, 36, 0.1); }
-        .player-card:hover, .news-card:hover { transform: translateY(-10px); border-color: #fbbf24; }
+        .player-card:hover { transform: translateY(-10px); border-color: #fbbf24; }
+        
+        /* --- TAHZEE2 ROOM STYLES --- */
+        #game-zone { height: 450px; position: relative; overflow: hidden; cursor: crosshair; background: radial-gradient(circle, #0f172a 0%, #020617 100%); }
+        .target-container { 
+            width: 120px; height: 120px; position: absolute; 
+            border-radius: 50%; border: 4px solid #fbbf24; 
+            overflow: hidden; display: flex; align-items: flex-end; justify-content: center;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+            z-index: 10;
+        }
+        .target-img-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
+        .target-name-overlay { 
+            position: relative; z-index: 2; width: 100%; background: rgba(0,0,0,0.8); 
+            color: #fbbf24; font-size: 10px; font-weight: 900; text-align: center; padding: 4px 0;
+            border-top: 1px solid #fbbf24; text-transform: uppercase;
+        }
+        .kick-text { position: absolute; color: #ef4444; font-weight: 900; pointer-events: none; z-index: 50; animation: blast 0.4s ease-out forwards; font-family: 'Inter', sans-serif; }
+        @keyframes blast { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2) translateY(-40px); opacity: 0; } }
+        .shake { animation: shakeEffect 0.2s ease-in-out; }
+        @keyframes shakeEffect { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+        /* Music Pulse */
+        .music-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(251, 191, 36, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } }
     </style>
 </head>
 <body class="bg-slate-950 text-white selection:bg-yellow-500 selection:text-slate-900">
 
+    <audio id="bg-anthem" loop><source src="anthem.mp3" type="audio/mpeg"></audio>
+    <div class="fixed bottom-6 right-6 z-[100]">
+        <button onclick="toggleAnthem()" id="music-btn" class="bg-yellow-500 text-slate-950 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center music-pulse">
+            <span id="music-icon" class="text-xl font-black">▶</span>
+        </button>
+    </div>
+
     <nav class="p-5 flex justify-between items-center bg-slate-900 sticky top-0 z-50 border-b border-yellow-500/20 shadow-xl">
-        <div class="text-2xl font-black italic text-yellow-500">
-            <span class="ar-text">خود واحد الرياضي</span>
-            <span class="en-text">TAKE ONE SC</span>
-        </div>
+        <div class="text-2xl font-black italic text-yellow-500"><span class="ar-text">خود واحد الرياضي</span><span class="en-text">TAKE ONE SC</span></div>
         <div class="flex items-center gap-4">
-            <a href="#news" class="hover:text-yellow-500 transition-colors mx-2 text-sm font-bold">
-                <span class="ar-text">الأخبار</span>
-                <span class="en-text">News</span>
-            </a>
-            <button onclick="toggleLanguage()" class="bg-slate-800 hover:bg-slate-700 px-5 py-2 rounded-full border border-slate-600 text-xs font-bold transition-all">
-                <span class="ar-text">English</span>
-                <span class="en-text">العربية</span>
+            <button onclick="toggleLanguage()" class="bg-slate-800 px-5 py-2 rounded-full border border-slate-600 text-xs font-bold transition-all">
+                <span class="ar-text">English</span><span class="en-text">العربية</span>
             </button>
             <a href="#apply" class="bg-yellow-500 hover:bg-yellow-400 px-6 py-2 rounded-full text-slate-950 font-black text-xs uppercase shadow-lg shadow-yellow-500/20 transition-all">
-                <span class="ar-text">انضم للفريق</span>
-                <span class="en-text">Join Us</span>
+                <span class="ar-text">انضم للفريق</span><span class="en-text">Join Us</span>
             </a>
         </div>
     </nav>
 
     <header class="py-24 px-6 text-center bg-gradient-to-b from-slate-900 to-slate-950">
-        <h1 class="text-6xl md:text-8xl font-black mb-6 italic tracking-tighter">
-            <span class="ar-text">فخر مدينة نصر</span>
-            <span class="en-text">NASR CITY PRIDE</span>
+        <h1 class="text-6xl md:text-8xl font-black mb-6 italic tracking-tighter uppercase">
+            <span class="ar-text">فخر مدينة نصر</span><span class="en-text">Nasr City Pride</span>
         </h1>
         <p class="text-slate-400 max-w-2xl mx-auto font-bold text-lg leading-relaxed">
             <span class="ar-text">نادي رياضي محترف يجمع نخبة المواهب بقلب واحد.</span>
@@ -56,126 +74,109 @@
         </p>
     </header>
 
-    <section id="news" class="container mx-auto py-20 px-6 border-b border-slate-900">
-        <h2 class="text-5xl font-black italic mb-12 border-r-8 border-yellow-500 pr-6">
-            <span class="ar-text">آخر الأخبار</span>
-            <span class="en-text">LATEST NEWS</span>
-        </h2>
-        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <section class="container mx-auto py-20 px-6 border-b border-slate-900">
+        <div class="text-center mb-10">
+            <h2 class="text-5xl font-black italic text-yellow-500 uppercase"><span class="ar-text">غرفة التهزيء</span><span class="en-text">Tahzee2 Room</span></h2>
+            <p class="text-slate-400 mt-2 font-bold uppercase tracking-widest text-[10px]">Kick the rivals for 30 seconds</p>
+        </div>
+        <div id="game-container" class="bg-slate-900 rounded-[2rem] p-1 border-4 border-yellow-500/20 relative">
+            <div id="start-screen" class="absolute inset-0 z-20 bg-slate-900/95 flex flex-col items-center justify-center rounded-[2rem]">
+                <p class="text-2xl font-black mb-8 italic text-yellow-500">SELECT TARGET:</p>
+                <div class="flex flex-wrap justify-center gap-6">
+                    <button onclick="startGame('Ahmed Sherif')" class="bg-slate-800 border-2 border-yellow-500/20 hover:border-yellow-500 p-6 rounded-2xl font-black transition-all flex flex-col items-center">
+                        <img src="https://i.ibb.co/6jgPWNb/IMG-2882.jpg" class="w-16 h-16 rounded-full object-cover mb-2 border border-yellow-500/50">AHMED SHERIF
+                    </button>
+                    <button onclick="startGame('Mahmoud Gamal')" class="bg-slate-800 border-2 border-yellow-500/20 hover:border-yellow-500 p-6 rounded-2xl font-black transition-all flex flex-col items-center">
+                        <div class="w-16 h-16 bg-slate-700 rounded-full flex items-center justify-center mb-2 font-black border border-yellow-500/50 text-xl">MG</div>MAHMOUD GAMAL
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-between p-6 bg-slate-950 rounded-t-[1.8rem] border-b border-white/5 font-black uppercase italic tracking-tighter">
+                <div class="text-yellow-500">TIMER: <span id="timer" class="text-white">30</span></div>
+                <div class="text-yellow-500">KICKS: <span id="score" class="text-white">0</span></div>
+            </div>
+            <div id="game-zone"></div>
         </div>
     </section>
 
     <section class="container mx-auto py-20 px-6">
-        <h2 class="text-5xl font-black italic mb-16 border-r-8 border-yellow-500 pr-6">
-            <span class="ar-text">نجوم الفريق</span>
-            <span class="en-text">THE ROSTER</span>
-        </h2>
-        <div id="player-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-        </div>
+        <h2 class="text-5xl font-black italic mb-16 border-r-8 border-yellow-500 pr-6"><span class="ar-text">نجوم الفريق</span><span class="en-text">THE ROSTER</span></h2>
+        <div id="player-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10"></div>
     </section>
 
     <section id="apply" class="py-24 bg-slate-900 border-y border-slate-800">
         <div class="max-w-4xl mx-auto px-6 text-center">
-            <h2 class="text-5xl font-black mb-8 italic">
-                <span class="ar-text">تجارب الأداء</span>
-                <span class="en-text">TRIALS</span>
-            </h2>
-            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-yellow-500">
-                <iframe 
-                    src="https://docs.google.com/forms/d/e/1FAIpQLSekg3NLHGxfcBV8x4ieeyOjqPAVY5MD1zDdSsSHxBLqR8i9lg/viewform?embedded=true" 
-                    width="100%" 
-                    height="900" 
-                    frameborder="0">تحميل...</iframe>
+            <h2 class="text-5xl font-black mb-8 italic text-yellow-500 uppercase"><span class="ar-text">انضم للفريق</span><span class="en-text">Trials</span></h2>
+            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-yellow-500 min-h-[600px]">
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSekg3NLHGxfcBV8x4ieeyOjqPAVY5MD1zDdSsSHxBLqR8i9lg/viewform?embedded=true" width="100%" height="800" frameborder="0" loading="lazy">تحميل...</iframe>
             </div>
         </div>
     </section>
 
-    <footer class="py-16 text-center text-slate-700 font-black tracking-widest text-[10px]">
-        <p>© 2026 TAKE ONE SPORTING CLUB | NASR CITY | خود واحد الرياضي</p>
-    </footer>
-
     <script>
-        // NEWS DATA - Add your match updates or events here
-        const newsData = [
-            {
-                titleAr: "انتصار ساحق في مدينة نصر",
-                titleEn: "Big Win in Nasr City",
-                descAr: "حقق الفريق فوزاً مستحقاً في مباراة أمس بنتيجة 3-1.",
-                descEn: "The team secured a well-deserved 3-1 victory in yesterday's match.",
-                date: "2026-02-07"
-            },
-            {
-                titleAr: "فتح باب تجارب الأداء",
-                titleEn: "Trials Now Open",
-                descAr: "ندعو المواهب الجديدة للانضمام إلى صفوف خود واحد.",
-                descEn: "Calling all new talents to join the ranks of Take One.",
-                date: "2026-02-01"
-            }
-        ];
-
-        // OFFICIAL ROSTER DATA
+        // OFFICIAL TEAM DATA
         const teamData = [
-            { nameAr: "يوسف (C)", nameEn: "Youssef (C)", posAr: "جناح / مهاجم", posEn: "LW / ST", stats: "Captain", photo: "https://i.ibb.co/mMfKQwc/IMG-2879.jpg" },
-            { nameAr: "آسر", nameEn: "Asser", posAr: "وسط ملعب", posEn: "CM", stats: "Playmaker", photo: "https://i.ibb.co/YFkyLg4R/IMG-2876.jpg" },
-            { nameAr: "جاسر", nameEn: "Gasser", posAr: "جناح أيمن", posEn: "RW", stats: "Speed Specialist", photo: "https://i.ibb.co/GfY9YV65/IMG-2861.png" },
-            { nameAr: "كيتكيت", nameEn: "Kitkit", posAr: "مهاجم / جناح", posEn: "ST / LW", stats: "kanas 3asafeer", photo: "https://i.ibb.co/bMsbQQvg/IMG-2885.jpg" },
-            { nameAr: "فلوحي", nameEn: "Faloo7y", posAr: "مهاجم", posEn: "ST", stats: "Fala7", photo: "https://i.ibb.co/pv63qtTf/77528798-5ece-4e9b-baec-2d977168da1b.jpg" },
-            { nameAr: "أحمد شريف", nameEn: "Ahmed Sherif", posAr: "حارس مرمى", posEn: "GK", stats: "5orm", photo: "https://i.ibb.co/6jgPWNb/IMG-2882.jpg" },
-            { nameAr: "شريف", nameEn: "Sherif", posAr: "وسط ملعب", posEn: "CM", stats: "Engine Room", photo: "https://i.ibb.co/V0CSSFzx/1056213a-9460-4acb-aafe-de71a9c3d7c3.jpg" }
+            { id: 1, nameAr: "يوسف (C)", nameEn: "Youssef (C)", posEn: "LW / ST", stats: "Captain", photo: "https://i.ibb.co/mMfKQwc/IMG-2879.jpg" },
+            { id: 2, nameAr: "آسر", nameEn: "Asser", posEn: "CM", stats: "Playmaker", photo: "https://i.ibb.co/YFkyLg4R/IMG-2876.jpg" },
+            { id: 3, nameAr: "جاسر", nameEn: "Gasser", posEn: "RW", stats: "Speed Specialist", photo: "https://i.ibb.co/GfY9YV65/IMG-2861.png" },
+            { id: 4, nameAr: "كيتكيت", nameEn: "Kitkit", posEn: "ST", stats: "Kanas 3asafeer", photo: "https://i.ibb.co/bMsbQQvg/IMG-2885.jpg" },
+            { id: 5, nameAr: "فلوحي", nameEn: "Faloo7y", posEn: "ST", stats: "Fala7", photo: "https://i.ibb.co/pv63qtTf/77528798-5ece-4e9b-baec-2d977168da1b.jpg" },
+            { id: 6, nameAr: "أحمد شريف", nameEn: "Ahmed Sherif", posEn: "GK", stats: "5orm", photo: "https://i.ibb.co/6jgPWNb/IMG-2882.jpg" },
+            { id: 7, nameAr: "شريف", nameEn: "Sherif", posEn: "CM", stats: "Engine Room", photo: "https://i.ibb.co/V0CSSFzx/1056213a-9460-4acb-aafe-de71a9c3d7c3.jpg" }
         ];
 
-        function renderNews() {
-            const grid = document.getElementById('news-grid');
-            grid.innerHTML = newsData.map(n => `
-                <div class="news-card bg-slate-900 p-8 rounded-[2rem] shadow-lg border border-slate-800">
-                    <span class="text-yellow-500 font-mono text-xs font-bold mb-4 block">${n.date}</span>
-                    <h3 class="text-2xl font-black italic mb-4">
-                        <span class="ar-text">${n.titleAr}</span>
-                        <span class="en-text">${n.titleEn}</span>
-                    </h3>
-                    <p class="text-slate-400 font-bold text-sm leading-relaxed">
-                        <span class="ar-text">${n.descAr}</span>
-                        <span class="en-text">${n.descEn}</span>
-                    </p>
-                </div>
-            `).join('');
+        let score = 0; let timeLeft = 30; let gameActive = false; let gameTimer;
+        const targetConfig = {
+            'Ahmed Sherif': { photo: 'https://i.ibb.co/6jgPWNb/IMG-2882.jpg', label: 'AHMED SHERIF' },
+            'Mahmoud Gamal': { photo: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png', label: 'MAHMOUD GAMAL' }
+        };
+
+        function startGame(key) {
+            document.getElementById('start-screen').classList.add('hidden');
+            score = 0; timeLeft = 30; gameActive = true;
+            document.getElementById('score').innerText = score;
+            document.getElementById('timer').innerText = timeLeft;
+            document.getElementById('game-zone').innerHTML = `<div id="target" class="target-container" onclick="kickPlayer(event)"><img src="${targetConfig[key].photo}" class="target-img-bg"><div class="target-name-overlay">${targetConfig[key].label}</div></div>`;
+            moveTarget();
+            gameTimer = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = timeLeft; if(timeLeft <= 0) endGame(); }, 1000);
         }
 
+        function moveTarget() {
+            if(!gameActive) return;
+            const target = document.getElementById('target');
+            const zone = document.getElementById('game-zone');
+            target.style.left = Math.random() * (zone.clientWidth - 130) + 'px';
+            target.style.top = Math.random() * (zone.clientHeight - 130) + 'px';
+        }
+
+        function kickPlayer(e) {
+            if(!gameActive) return;
+            score++; document.getElementById('score').innerText = score;
+            const t = document.getElementById('target'); t.classList.add('shake'); setTimeout(() => t.classList.remove('shake'), 200);
+            const fx = document.createElement('div'); fx.className = 'kick-text'; fx.innerText = 'POW! 🦶'; fx.style.left = e.clientX - 50 + 'px'; fx.style.top = e.clientY - 50 + 'px';
+            document.body.appendChild(fx); setTimeout(() => fx.remove(), 400);
+            moveTarget();
+        }
+
+        function endGame() { clearInterval(gameTimer); gameActive = false; alert(`Tahzee2 Over! Total Kicks: ${score}`); document.getElementById('start-screen').classList.remove('hidden'); document.getElementById('game-zone').innerHTML = ''; }
+
         function renderPlayers() {
-            const grid = document.getElementById('player-grid');
-            grid.innerHTML = teamData.map(p => `
-                <div class="player-card bg-slate-900 rounded-[2rem] overflow-hidden shadow-lg">
-                    <img src="${p.photo}" class="player-img" alt="${p.nameEn}">
-                    <div class="p-8">
-                        <h3 class="text-3xl font-black italic mb-1">
-                            <span class="ar-text">${p.nameAr}</span>
-                            <span class="en-text">${p.nameEn}</span>
-                        </h3>
-                        <p class="text-yellow-500 font-bold text-sm mb-6 uppercase tracking-widest">
-                            <span class="ar-text">${p.posAr}</span>
-                            <span class="en-text">${p.posEn}</span>
-                        </p>
-                        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs font-mono text-slate-400 text-center uppercase">
-                            ${p.stats}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            document.getElementById('player-grid').innerHTML = teamData.map(p => `
+                <div class="player-card bg-slate-900 rounded-[2rem] overflow-hidden shadow-lg"><img src="${p.photo}" class="player-img"><div class="p-8 text-center"><h3 class="text-3xl font-black italic mb-1 uppercase">${p.nameEn}</h3><p class="text-yellow-500 font-bold text-sm mb-6 uppercase tracking-widest">${p.posEn}</p><div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs text-slate-400 font-bold uppercase tracking-[0.2em]">${p.stats}</div></div></div>`).join('');
+        }
+
+        function toggleAnthem() {
+            const a = document.getElementById('bg-anthem'); const b = document.getElementById('music-btn'); const i = document.getElementById('music-icon');
+            if (a.paused) { a.play(); i.innerText = "⏸"; b.classList.remove('music-pulse'); b.classList.add('bg-green-500'); }
+            else { a.pause(); i.innerText = "▶"; b.classList.add('music-pulse'); b.classList.remove('bg-green-500'); }
         }
 
         function toggleLanguage() {
-            const body = document.body;
-            const html = document.getElementById('main-html');
-            if (html.getAttribute('dir') === 'rtl') {
-                html.setAttribute('dir', 'ltr');
-                body.classList.add('lang-en');
-            } else {
-                html.setAttribute('dir', 'rtl');
-                body.classList.remove('lang-en');
-            }
+            const h = document.getElementById('main-html');
+            if (h.getAttribute('dir') === 'rtl') { h.setAttribute('dir', 'ltr'); document.body.classList.add('lang-en'); }
+            else { h.setAttribute('dir', 'rtl'); document.body.classList.remove('lang-en'); }
         }
 
-        renderNews();
         renderPlayers();
     </script>
 </body>
